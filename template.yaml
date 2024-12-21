@@ -19,8 +19,8 @@ Resources:
     Properties:
       VpcId: !Ref MyVPC
       CidrBlock: 10.0.1.0/24
-      MapPublicIpOnLaunch: true
-      AvailabilityZone: !Select [ 0, !GetAZs '' ]
+      MapPublicIpOnLaunch: true # Garante que as instâncias recebem IP público ao serem criadas
+      AvailabilityZone: !Select [ 0, !GetAZs '' ] # Seleção de zona de disponibilidade
       Tags:
         - Key: Name
           Value: Izaias-tf-Subnet
@@ -55,7 +55,7 @@ Resources:
     DependsOn: MyVPCGatewayAttachment
     Properties:
       RouteTableId: !Ref MyRouteTable
-      DestinationCidrBlock: 0.0.0.0/0
+      DestinationCidrBlock: 0.0.0.0/0 # Rota para todo tráfego externo
       GatewayId: !Ref MyInternetGateway
 
   # Associação entre a tabela de rotas e a subnet
@@ -75,12 +75,12 @@ Resources:
         - IpProtocol: tcp
           FromPort: 80
           ToPort: 80
-          CidrIp: 0.0.0.0/0
+          CidrIp: 0.0.0.0/0 # Acesso permitido de qualquer IP externo
       Tags:
         - Key: Name
           Value: Izaias-tf-HTTPAccess 
   
-  # Instância EC2: Máquina virtual configurada com aplicação web personalizada
+  # Instância EC2: Máquina virtual configurada com aplicação web de evidência
   MyInstance:
     Type: AWS::EC2::Instance
     Properties:
@@ -96,6 +96,8 @@ Resources:
       Tags:
         - Key: Name
           Value: Izaias-tf-Instance 
+      
+      # Script de inicialização para instalação e configuração do servidor web com evidência personalizada
       UserData: 
         Fn::Base64: !Sub |
           #!/bin/bash
