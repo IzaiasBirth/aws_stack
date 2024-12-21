@@ -19,8 +19,8 @@ Resources:
     Properties:
       VpcId: !Ref MyVPC
       CidrBlock: 10.0.1.0/24
-      MapPublicIpOnLaunch: true # Garante que as instâncias recebem IP público ao serem criadas
-      AvailabilityZone: !Select [ 0, !GetAZs '' ] # Seleção de zona de disponibilidade
+      MapPublicIpOnLaunch: true
+      AvailabilityZone: !Select [ 0, !GetAZs '' ]
       Tags:
         - Key: Name
           Value: Izaias-tf-Subnet
@@ -55,7 +55,7 @@ Resources:
     DependsOn: MyVPCGatewayAttachment
     Properties:
       RouteTableId: !Ref MyRouteTable
-      DestinationCidrBlock: 0.0.0.0/0 # Rota para todo tráfego externo
+      DestinationCidrBlock: 0.0.0.0/0
       GatewayId: !Ref MyInternetGateway
 
   # Associação entre a tabela de rotas e a subnet
@@ -73,9 +73,9 @@ Resources:
       VpcId: !Ref MyVPC
       SecurityGroupIngress:
         - IpProtocol: tcp
-          FromPort: '80'
-          ToPort: '80'
-          CidrIp: 0.0.0.0/0 # Acesso permitido de qualquer IP externo
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
       Tags:
         - Key: Name
           Value: Izaias-tf-HTTPAccess 
@@ -84,20 +84,18 @@ Resources:
   MyInstance:
     Type: AWS::EC2::Instance
     Properties:
-      InstanceType: t2.micro # Tipo de instância para fins de economia
+      InstanceType: t2.micro
       ImageId: ami-01816d07b1128cd2d 
-      KeyName: vockey # Nome do par de chaves para acesso SSH
+      KeyName: vockey
       NetworkInterfaces:
-        - AssociatePublicIpAddress: true # Garante IP público para a instância
+        - AssociatePublicIpAddress: true
           DeviceIndex: "0"
           GroupSet:
-            - !Ref MySecurityGroup # Associa o Security Group configurado
+            - !Ref MySecurityGroup
           SubnetId: !Ref MySubnet
       Tags:
         - Key: Name
           Value: Izaias-tf-Instance 
-      
-      # Script de inicialização para instalação e configuração do servidor web com evidência personalizada
       UserData: 
         Fn::Base64: !Sub |
           #!/bin/bash
@@ -109,9 +107,9 @@ Resources:
 
 Outputs:
   # Saída: IP público da instância
-  InstacePublicIP:
+  InstancePublicIP:
     Description: IP público da instância EC2
-    Value: !GetAtt MySubnet.MapPublicIpOnLaunch
+    Value: !GetAtt MyInstance.PublicIp
   
   # Saída: ID da VPC criada
   VPCID:
